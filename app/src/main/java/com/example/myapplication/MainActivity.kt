@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -57,10 +58,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +77,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun BottomSheetContent(onHideClick: () -> Unit) {
+fun BottomSheetContent(
+    onHideClick: () -> Unit,
+    onNavigateToMain: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -88,7 +94,10 @@ fun BottomSheetContent(onHideClick: () -> Unit) {
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onHideClick) {
+        Button(onClick = {
+            onHideClick()
+            onNavigateToMain()
+        }) {
             Text("Hide Sheet")
         }
     }
@@ -109,92 +118,37 @@ fun MyApp() {
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet(
-                    modifier = Modifier
-                        .width(280.dp)
+                    modifier = Modifier.width(280.dp)
                 ) {
-                    // Drawer header
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp)
-                            .background(MaterialTheme.colorScheme.primary)
-                            .padding(16.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_launcher_background),
-                                contentDescription = "App Logo",
-                                modifier = Modifier.size(48.dp)
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                text = "Do-Droid",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                    }
-                    // Drawer content
-                    Column(modifier = Modifier.fillMaxHeight()) {
-                        DrawerMenuItem(
-                            text = "Home",
-                            icon = Icons.Default.Home,
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                    navController.navigate("home")
-                                }
-                            }
-                        )
-                        DrawerMenuItem(
-                            text = "Settings",
-                            icon = Icons.Default.Settings,
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                    navController.navigate("settings")
-                                }
-                            }
-                        )
-                        DrawerMenuItem(
-                            text = "About",
-                            icon = Icons.Default.Info,
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                    navController.navigate("about")
-                                }
-                            }
-                        )
-                        DrawerMenuItem(
-                            text = "Help",
-                            icon = Icons.Default.Star,
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                    navController.navigate("help")
-                                }
-                            }
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        DrawerMenuItem(
-                            text = "Back to Main Menu",
-                            icon = Icons.Default.ArrowBack,
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                    navController.popBackStack(route = "main", inclusive = false)
-                                }
-                            }
-                        )
-                    }
+                    DrawerHeader()
+                    DrawerContent(navController, drawerState, scope)
                 }
             }
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            BottomSheetScaffold(
+                scaffoldState = scaffoldState,
+                sheetContent = {
+                    BottomSheetContent(
+                        onHideClick = {
+                            scope.launch {
+                                try {
+                                    scaffoldState.bottomSheetState.hide()
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        },
+                        onNavigateToMain = {
+                            navController.navigate("main") {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    )
+                },
+                sheetPeekHeight = 0.dp
+            ) {
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -225,50 +179,126 @@ fun MyApp() {
                         }
                     }
                 ) { paddingValues ->
-                    BottomSheetScaffold(
-                        scaffoldState = scaffoldState,
-                        sheetContent = {
-                            BottomSheetContent(
-                                onHideClick = { scope.launch { scaffoldState.bottomSheetState.hide() } }
-                            )
-                        },
-                        sheetPeekHeight = 0.dp,
-                        modifier = Modifier.padding(paddingValues)
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        color = MaterialTheme.colorScheme.background
                     ) {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            color = MaterialTheme.colorScheme.background
+                        NavHost(
+                            navController = navController,
+                            startDestination = "main"
                         ) {
-                            NavHost(
-                                navController = navController,
-                                startDestination = "main"
-                            ) {
-                                composable("main") {
-                                    MainContent(
-                                        name = "friend",
-                                        onShowBottomSheetClick = { scope.launch { scaffoldState.bottomSheetState.expand() } },
-                                        showDialog = showDialog,
-                                        onDismissDialog = { showDialog = false }
-                                    )
-                                }
-                                composable("home") {
-                                    HomeScreen()
-                                }
-                                composable("settings") {
-                                    SettingsScreen()
-                                }
-                                composable("about") {
-                                    AboutScreen()
-                                }
-                                composable("help") {
-                                    HelpScreen()
-                                }
+                            composable("main") {
+                                MainContent(
+                                    name = "friend",
+                                    onShowBottomSheetClick = { scope.launch { scaffoldState.bottomSheetState.expand() } },
+                                    showDialog = showDialog,
+                                    onDismissDialog = { showDialog = false }
+                                )
                             }
+                            composable("home") { HomeScreen() }
+                            composable("settings") { SettingsScreen() }
+                            composable("about") { AboutScreen() }
+                            composable("help") { HelpScreen() }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun DrawerHeader() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .background(MaterialTheme.colorScheme.primary)
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_background),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(48.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Do-Droid",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+@Composable
+fun DrawerContent(
+    navController: NavHostController,
+    drawerState: DrawerState,
+    scope: CoroutineScope
+) {
+    Column(modifier = Modifier.fillMaxHeight()) {
+        DrawerMenuItem(
+            text = "Home",
+            icon = Icons.Default.Home,
+            onClick = {
+                scope.launch {
+                    drawerState.close()
+                    navController.navigate("home")
+                }
+            }
+        )
+        DrawerMenuItem(
+            text = "Settings",
+            icon = Icons.Default.Settings,
+            onClick = {
+                scope.launch {
+                    drawerState.close()
+                    navController.navigate("settings")
+                }
+            }
+        )
+        DrawerMenuItem(
+            text = "About",
+            icon = Icons.Default.Info,
+            onClick = {
+                scope.launch {
+                    drawerState.close()
+                    navController.navigate("about")
+                }
+            }
+        )
+        DrawerMenuItem(
+            text = "Help",
+            icon = Icons.Default.Star,
+            onClick = {
+                scope.launch {
+                    drawerState.close()
+                    navController.navigate("help")
+                }
+            }
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        DrawerMenuItem(
+            text = "Back to Main Menu",
+            icon = Icons.Default.ArrowBack,
+            onClick = {
+                scope.launch {
+                    drawerState.close()
+                    navController.navigate("main") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -375,7 +405,7 @@ fun SettingsScreen() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Settings Screen",
+                text = "Settings",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -395,7 +425,7 @@ fun AboutScreen() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "About Screen",
+                text = "About Us",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -415,7 +445,7 @@ fun HelpScreen() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Help Screen",
+                text = "Help",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -423,9 +453,10 @@ fun HelpScreen() {
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
-fun MyAppPreview() {
-    MyApp()
+fun DefaultPreview() {
+    MyApplicationTheme {
+        MyApp()
+    }
 }
