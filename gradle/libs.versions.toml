@@ -17,6 +17,7 @@ lifecycleRuntimeKtxVersion = "2.4.0"
 material3 = "1.1.0-alpha05"
 materialIconsExtended = "1.1.0-alpha05"
 materialIconsCore = "1.1.0-alpha05"
+navigationComposeVersion = "2.5.3"
 rules = "1.4.0"
 uiTestJunit4 = "1.1.0-alpha05"
 uiTooling = "1.1.0-alpha05"
@@ -33,6 +34,7 @@ androidx-lifecycle-runtime-ktx-v240 = { module = "androidx.lifecycle:lifecycle-r
 androidx-core-ktx-v170 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
 androidx-material-icons-extended = { module = "androidx.compose.material3:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-material-icons-core = { module = "androidx.compose.material3:material-icons-core", version.ref = "materialIconsCore" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

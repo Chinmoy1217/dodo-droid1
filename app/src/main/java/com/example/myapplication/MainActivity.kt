@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
@@ -50,13 +51,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
 
@@ -99,6 +102,7 @@ fun MyApp() {
     val scaffoldState = rememberBottomSheetScaffoldState()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val navController = rememberNavController()
 
     MyApplicationTheme(darkTheme = isDarkMode) {
         ModalNavigationDrawer(
@@ -106,14 +110,14 @@ fun MyApp() {
             drawerContent = {
                 ModalDrawerSheet(
                     modifier = Modifier
-                        .width(280.dp) // Adjust the width of the drawer
+                        .width(280.dp)
                 ) {
                     // Drawer header
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp) // Adjust header height as needed
-                            .background(MaterialTheme.colorScheme.primary) // Background color for the header
+                            .height(120.dp)
+                            .background(MaterialTheme.colorScheme.primary)
                             .padding(16.dp)
                     ) {
                         Row(
@@ -126,10 +130,10 @@ fun MyApp() {
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                text = "App Name",
+                                text = "Do-Droid",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }
@@ -138,22 +142,53 @@ fun MyApp() {
                         DrawerMenuItem(
                             text = "Home",
                             icon = Icons.Default.Home,
-                            onClick = { /* Handle navigation to Home screen */ }
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    navController.navigate("home")
+                                }
+                            }
                         )
                         DrawerMenuItem(
                             text = "Settings",
                             icon = Icons.Default.Settings,
-                            onClick = { /* Handle navigation to Settings screen */ }
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    navController.navigate("settings")
+                                }
+                            }
                         )
                         DrawerMenuItem(
                             text = "About",
                             icon = Icons.Default.Info,
-                            onClick = { /* Handle navigation to About screen */ }
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    navController.navigate("about")
+                                }
+                            }
                         )
                         DrawerMenuItem(
                             text = "Help",
                             icon = Icons.Default.Star,
-                            onClick = { /* Handle navigation to Help screen */ }
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    navController.navigate("help")
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        DrawerMenuItem(
+                            text = "Back to Main Menu",
+                            icon = Icons.Default.ArrowBack,
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    navController.popBackStack(route = "main", inclusive = false)
+                                }
+                            }
                         )
                     }
                 }
@@ -204,12 +239,31 @@ fun MyApp() {
                             modifier = Modifier.fillMaxSize(),
                             color = MaterialTheme.colorScheme.background
                         ) {
-                            MainContent(
-                                name = "friend",
-                                onShowBottomSheetClick = { scope.launch { scaffoldState.bottomSheetState.expand() } },
-                                showDialog = showDialog,
-                                onDismissDialog = { showDialog = false }
-                            )
+                            NavHost(
+                                navController = navController,
+                                startDestination = "main"
+                            ) {
+                                composable("main") {
+                                    MainContent(
+                                        name = "friend",
+                                        onShowBottomSheetClick = { scope.launch { scaffoldState.bottomSheetState.expand() } },
+                                        showDialog = showDialog,
+                                        onDismissDialog = { showDialog = false }
+                                    )
+                                }
+                                composable("home") {
+                                    HomeScreen()
+                                }
+                                composable("settings") {
+                                    SettingsScreen()
+                                }
+                                composable("about") {
+                                    AboutScreen()
+                                }
+                                composable("help") {
+                                    HelpScreen()
+                                }
+                            }
                         }
                     }
                 }
@@ -243,8 +297,13 @@ fun MainContent(
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = onDismissDialog,
-                title = { Text("Dialog Title") },
-                text = { Text("This is a dialog message.") },
+                title = { Text("Dialog Title", color = MaterialTheme.colorScheme.onSurface) },
+                text = {
+                    Text(
+                        "This is a dialog message.",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 confirmButton = {
                     Button(onClick = onDismissDialog) {
                         Text("OK")
@@ -261,7 +320,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         text = "Hello $name!",
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
-        modifier = modifier
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.onSurface
     )
 }
 
@@ -280,7 +340,87 @@ fun DrawerMenuItem(
     ) {
         Icon(imageVector = icon, contentDescription = null)
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = text)
+        Text(text = text, color = MaterialTheme.colorScheme.onSurface)
+    }
+}
+
+@Composable
+fun HomeScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "Welcome to the Home Screen!",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingsScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "Settings Screen",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    }
+}
+
+@Composable
+fun AboutScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "About Screen",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    }
+}
+
+@Composable
+fun HelpScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "Help Screen",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
     }
 }
 
