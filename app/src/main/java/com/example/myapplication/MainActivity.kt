@@ -33,6 +33,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -49,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -93,68 +95,122 @@ fun BottomSheetContent(onHideClick: () -> Unit) {
 @Composable
 fun MyApp() {
     var isDarkMode by remember { mutableStateOf(false) }
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
     var showDialog by remember { mutableStateOf(false) }
     val scaffoldState = rememberBottomSheetScaffoldState()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     MyApplicationTheme(darkTheme = isDarkMode) {
         ModalNavigationDrawer(
             drawerState = drawerState,
-            drawerContent = { NavigationDrawerContent() }
-        ) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(text = "Do-Droid") },
-                        navigationIcon = {
-                            IconButton(onClick = {
-                                scope.launch {
-                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
-                                }
-                            }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu")
-                            }
-                        },
-                        actions = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("Dark Mode")
-                                Switch(
-                                    checked = isDarkMode,
-                                    onCheckedChange = { isDarkMode = it }
-                                )
-                            }
+            drawerContent = {
+                ModalDrawerSheet(
+                    modifier = Modifier
+                        .width(280.dp) // Adjust the width of the drawer
+                ) {
+                    // Drawer header
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp) // Adjust header height as needed
+                            .background(MaterialTheme.colorScheme.primary) // Background color for the header
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_launcher_background),
+                                contentDescription = "App Logo",
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "App Name",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
                         }
-                    )
-                },
-                floatingActionButton = {
-                    FloatingActionButton(onClick = { showDialog = true }) {
-                        Text("+")
+                    }
+                    // Drawer content
+                    Column(modifier = Modifier.fillMaxHeight()) {
+                        DrawerMenuItem(
+                            text = "Home",
+                            icon = Icons.Default.Home,
+                            onClick = { /* Handle navigation to Home screen */ }
+                        )
+                        DrawerMenuItem(
+                            text = "Settings",
+                            icon = Icons.Default.Settings,
+                            onClick = { /* Handle navigation to Settings screen */ }
+                        )
+                        DrawerMenuItem(
+                            text = "About",
+                            icon = Icons.Default.Info,
+                            onClick = { /* Handle navigation to About screen */ }
+                        )
+                        DrawerMenuItem(
+                            text = "Help",
+                            icon = Icons.Default.Star,
+                            onClick = { /* Handle navigation to Help screen */ }
+                        )
                     }
                 }
-            ) { paddingValues ->
-                BottomSheetScaffold(
-                    scaffoldState = scaffoldState,
-                    sheetContent = {
-                        BottomSheetContent(
-                            onHideClick = { scope.launch { scaffoldState.bottomSheetState.hide() } }
+            }
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text(text = "Do-Droid") },
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    scope.launch { drawerState.open() }
+                                }) {
+                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                }
+                            },
+                            actions = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Dark Mode")
+                                    Switch(
+                                        checked = isDarkMode,
+                                        onCheckedChange = { isDarkMode = it }
+                                    )
+                                }
+                            }
                         )
                     },
-                    sheetPeekHeight = 0.dp,
-                    modifier = Modifier.padding(paddingValues)
-                ) {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
+                    floatingActionButton = {
+                        FloatingActionButton(onClick = { showDialog = true }) {
+                            Text("+")
+                        }
+                    }
+                ) { paddingValues ->
+                    BottomSheetScaffold(
+                        scaffoldState = scaffoldState,
+                        sheetContent = {
+                            BottomSheetContent(
+                                onHideClick = { scope.launch { scaffoldState.bottomSheetState.hide() } }
+                            )
+                        },
+                        sheetPeekHeight = 0.dp,
+                        modifier = Modifier.padding(paddingValues)
                     ) {
-                        MainContent(
-                            name = "friend",
-                            onShowBottomSheetClick = { scope.launch { scaffoldState.bottomSheetState.expand() } },
-                            showDialog = showDialog,
-                            onDismissDialog = { showDialog = false }
-                        )
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background
+                        ) {
+                            MainContent(
+                                name = "friend",
+                                onShowBottomSheetClick = { scope.launch { scaffoldState.bottomSheetState.expand() } },
+                                showDialog = showDialog,
+                                onDismissDialog = { showDialog = false }
+                            )
+                        }
                     }
                 }
             }
@@ -210,68 +266,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun NavigationDrawerContent() {
-    val colorScheme = MaterialTheme.colorScheme
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = colorScheme.primary // Set background color
-    ) {
-        Column {
-            // Drawer header
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp) // Adjust header height as needed
-                    .background(colorScheme.primary.copy(alpha = 0.8f)) // Set header background color
-                    .padding(16.dp)
-            ) {
-                // Add your header content here (e.g., app logo, title)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_action_name), // Ensure the icon is in the res/drawable folder
-                        contentDescription = "App Logo",
-                        modifier = Modifier.size(56.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "App Name",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
-
-            // Navigation menu items
-            Column(modifier = Modifier.fillMaxHeight()) { // Separate column for menu items
-                NavigationDrawerItem(
-                    text = "Home",
-                    icon = Icons.Default.Home,
-                    onClick = { /* Handle navigation to Home screen */ }
-                )
-                NavigationDrawerItem(
-                    text = "Settings",
-                    icon = Icons.Default.Settings,
-                    onClick = { /* Handle navigation to Settings screen */ }
-                )
-                NavigationDrawerItem(
-                    text = "About",
-                    icon = Icons.Default.Info,
-                    onClick = { /* Handle navigation to About screen */ }
-                )
-                NavigationDrawerItem(
-                    text = "Help",
-                    icon = Icons.Default.Star,
-                    onClick = { /* Handle navigation to Help screen */ }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun NavigationDrawerItem(
+fun DrawerMenuItem(
     text: String,
     icon: ImageVector,
     onClick: () -> Unit
