@@ -1,10 +1,12 @@
 package com.example.myapplication.ui.theme
 
-
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
+val Greenishlue = Color(0xFF00796B)
+
+// Extend your DarkColorScheme with an additional cyan color
 val DarkColorScheme = darkColorScheme(
     primary = Color(0xFFBB86FC),
     onPrimary = Color.Black,
@@ -21,9 +23,11 @@ val DarkColorScheme = darkColorScheme(
     error = Color(0xFFCF6679),
     onError = Color.Black,
     errorContainer = Color(0xFFB00020),
-    onErrorContainer = Color.White
+    onErrorContainer = Color.White,
+    // Define a cyan color
 )
 
+// Extend your LightColorScheme with an additional cyan color
 val LightColorScheme = lightColorScheme(
     primary = Color(0xFF6200EE),
     onPrimary = Color.White,
@@ -40,5 +44,6 @@ val LightColorScheme = lightColorScheme(
     error = Color(0xFFB00020),
     onError = Color.White,
     errorContainer = Color(0xFFCF6679),
-    onErrorContainer = Color.Black
+    onErrorContainer = Color.Black,
+    // Define a cyan color
 )

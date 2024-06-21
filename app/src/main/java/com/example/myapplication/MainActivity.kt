@@ -66,6 +66,7 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +76,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 @Composable
 fun BottomSheetContent(
     onHideClick: () -> Unit,
@@ -102,11 +102,11 @@ fun BottomSheetContent(
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyApp() {
     var isDarkMode by remember { mutableStateOf(false) }
+    var isLoggedIn by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     val scaffoldState = rememberBottomSheetScaffoldState()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -114,93 +114,103 @@ fun MyApp() {
     val navController = rememberNavController()
 
     MyApplicationTheme(darkTheme = isDarkMode) {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet(
-                    modifier = Modifier.width(280.dp)
-                ) {
-                    DrawerHeader()
-                    DrawerContent(navController, drawerState, scope)
+        if (!isLoggedIn) {
+            LoginScreen(
+                onLoginSuccess = { isLoggedIn = true },
+                onForgotPassword = { navController.navigate("forgotPassword") },
+                onRegister = { navController.navigate("register") }
+            )
+        } else {
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                drawerContent = {
+                    ModalDrawerSheet(
+                        modifier = Modifier.width(280.dp)
+                    ) {
+                        DrawerHeader()
+                        DrawerContent(navController, drawerState, scope)
+                    }
                 }
-            }
-        ) {
-            BottomSheetScaffold(
-                scaffoldState = scaffoldState,
-                sheetContent = {
-                    BottomSheetContent(
-                        onHideClick = {
-                            scope.launch {
-                                try {
-                                    scaffoldState.bottomSheetState.hide()
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            }
-                        },
-                        onNavigateToMain = {
-                            navController.navigate("main") {
-                                popUpTo(navController.graph.startDestinationId) {
-                                    inclusive = true
-                                }
-                            }
-                        }
-                    )
-                },
-                sheetPeekHeight = 0.dp
             ) {
-                Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            title = { Text(text = "Do-Droid") },
-                            navigationIcon = {
-                                IconButton(onClick = {
-                                    scope.launch { drawerState.open() }
-                                }) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                BottomSheetScaffold(
+                    scaffoldState = scaffoldState,
+                    sheetContent = {
+                        BottomSheetContent(
+                            onHideClick = {
+                                scope.launch {
+                                    try {
+                                        scaffoldState.bottomSheetState.hide()
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
                                 }
                             },
-                            actions = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text("Dark Mode")
-                                    Switch(
-                                        checked = isDarkMode,
-                                        onCheckedChange = { isDarkMode = it }
-                                    )
+                            onNavigateToMain = {
+                                navController.navigate("main") {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        inclusive = true
+                                    }
                                 }
                             }
                         )
                     },
-                    floatingActionButton = {
-                        FloatingActionButton(onClick = { showDialog = true }) {
-                            Text("+")
-                        }
-                    }
-                ) { paddingValues ->
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        NavHost(
-                            navController = navController,
-                            startDestination = "main"
-                        ) {
-                            composable("main") {
-                                MainContent(
-                                    name = "friend",
-                                    onShowBottomSheetClick = { scope.launch { scaffoldState.bottomSheetState.expand() } },
-                                    showDialog = showDialog,
-                                    onDismissDialog = { showDialog = false }
-                                )
+                    sheetPeekHeight = 0.dp
+                ) {
+                    Scaffold(
+                        topBar = {
+                            TopAppBar(
+                                title = { Text(text = "Do-Droid") },
+                                navigationIcon = {
+                                    IconButton(onClick = {
+                                        scope.launch { drawerState.open() }
+                                    }) {
+                                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                    }
+                                },
+                                actions = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("Dark Mode")
+                                        Switch(
+                                            checked = isDarkMode,
+                                            onCheckedChange = { isDarkMode = it }
+                                        )
+                                    }
+                                }
+                            )
+                        },
+                        floatingActionButton = {
+                            FloatingActionButton(onClick = { showDialog = true }) {
+                                Text("+")
                             }
-                            composable("home") { HomeScreen() }
-                            composable("settings") { SettingsScreen() }
-                            composable("about") { AboutScreen() }
-                            composable("help") { HelpScreen() }
+                        }
+                    ) { paddingValues ->
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                            color = MaterialTheme.colorScheme.background
+                        ) {
+                            NavHost(
+                                navController = navController,
+                                startDestination = "main"
+                            ) {
+                                composable("main") {
+                                    MainContent(
+                                        name = "friend",
+                                        onShowBottomSheetClick = { scope.launch { scaffoldState.bottomSheetState.expand() } },
+                                        showDialog = showDialog,
+                                        onDismissDialog = { showDialog = false }
+                                    )
+                                }
+                                composable("home") { HomeScreen() }
+                                composable("settings") { SettingsScreen() }
+                                composable("about") { AboutScreen() }
+                                composable("help") { HelpScreen() }
+                                composable("forgotPassword") { ForgotPasswordScreen() }
+                                composable("register") { RegisterScreen() }
+                            }
                         }
                     }
                 }
@@ -405,7 +415,7 @@ fun SettingsScreen() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Settings",
+                text = "Settings Screen",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -425,7 +435,7 @@ fun AboutScreen() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "About Us",
+                text = "About Screen",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -445,7 +455,7 @@ fun HelpScreen() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Help",
+                text = "Help Screen",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
