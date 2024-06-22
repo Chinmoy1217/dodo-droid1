@@ -48,25 +48,44 @@ android {
         }
     }
 }
-
 dependencies {
-
+    // Core Android dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
+    // Jetpack Compose dependencies
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.drawerlayout)
     implementation(libs.androidx.navigation.compose)
+
+    // Image Loading libraries
+    implementation(libs.io.coil.kt.coil.compose)
+    implementation(libs.coil.compose.v140)
+
+    // Retrofit for networking
+    implementation(libs.squareup.retrofit)
+    implementation(libs.squareup.converter.gson)
+
+    // Kotlin Coroutines for async operations
     implementation(libs.jetbrains.kotlinx.coroutines.core)
+
+    // Lifecycle components
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.runtime.livedata)
+
+    // Testing libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    // Debugging dependencies
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

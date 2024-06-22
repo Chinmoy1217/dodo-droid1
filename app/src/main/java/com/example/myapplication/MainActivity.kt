@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
@@ -76,6 +77,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun BottomSheetContent(
     onHideClick: () -> Unit,
@@ -102,6 +104,7 @@ fun BottomSheetContent(
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyApp() {
@@ -210,6 +213,7 @@ fun MyApp() {
                                 composable("help") { HelpScreen() }
                                 composable("forgotPassword") { ForgotPasswordScreen() }
                                 composable("register") { RegisterScreen() }
+                                composable("products") { ProductListScreen() }
                             }
                         }
                     }
@@ -294,6 +298,17 @@ fun DrawerContent(
                 }
             }
         )
+        DrawerMenuItem(
+            text = "Products",
+            icon = Icons.Default.ShoppingCart,
+            onClick = {
+                scope.launch {
+                    drawerState.close()
+                    navController.navigate("products")
+                }
+            }
+
+        )
         Spacer(modifier = Modifier.weight(1f))
         DrawerMenuItem(
             text = "Back to Main Menu",
@@ -302,6 +317,7 @@ fun DrawerContent(
                 scope.launch {
                     drawerState.close()
                     navController.navigate("main") {
+                        // Pop up to the start destination of the navigation graph
                         popUpTo(navController.graph.startDestinationId) {
                             inclusive = true
                         }
@@ -310,6 +326,30 @@ fun DrawerContent(
             }
         )
     }
+}
+
+@Composable
+fun DrawerMenuItem(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = text)
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = text)
+    }
+}
+
+@Composable
+fun ProductListScreen() {
+    ProductList()
 }
 
 @Composable
@@ -363,25 +403,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         modifier = modifier,
         color = MaterialTheme.colorScheme.onSurface
     )
-}
-
-@Composable
-fun DrawerMenuItem(
-    text: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(imageVector = icon, contentDescription = null)
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(text = text, color = MaterialTheme.colorScheme.onSurface)
-    }
 }
 
 @Composable
