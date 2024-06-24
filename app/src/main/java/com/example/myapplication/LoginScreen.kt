@@ -33,6 +33,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun ForgotPasswordScreen() {
@@ -58,6 +61,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var loginError by remember { mutableStateOf(false) }
+    val auth: FirebaseAuth = Firebase.auth
 
     Box(
         modifier = Modifier
@@ -140,11 +144,14 @@ fun LoginScreen(
             ) {
                 Button(
                     onClick = {
-                        if (username == ADMIN_USERNAME && password == ADMIN_PASSWORD) {
-                            onLoginSuccess()
-                        } else {
-                            loginError = true
-                        }
+                        auth.signInWithEmailAndPassword(username, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    onLoginSuccess()
+                                } else {
+                                    loginError = true
+                                }
+                            }
                     },
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
@@ -179,6 +186,3 @@ fun LoginScreen(
         )
     }
 }
-
-private const val ADMIN_USERNAME = "admin"
-private const val ADMIN_PASSWORD = "password"
