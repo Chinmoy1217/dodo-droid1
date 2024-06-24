@@ -3,9 +3,13 @@ package com.example.myapplication
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -84,7 +88,12 @@ class ProductViewModel : ViewModel() {
 
     private fun fetchProducts() {
         viewModelScope.launch {
-            _products.value = repository.getProducts()
+            try {
+                val products = repository.getProducts()
+                _products.value = products
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
@@ -104,43 +113,56 @@ fun ProductList(viewModel: ProductViewModel = androidx.lifecycle.viewmodel.compo
 // Composable function for displaying a single product item
 @Composable
 fun ProductItem(product: Product) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
     ) {
-        Text(
-            text = product.title,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
-        )
-        Text(
-            text = "Price: $${product.price}",
-            color = Color.Gray,
-            fontSize = 16.sp
-        )
-        Text(
-            text = product.description,
-            fontSize = 14.sp
-        )
-        // Load and display image using Coil
-        Image(
-            painter = // Enable crossfade animation between placeholders and loaded images
-            rememberAsyncImagePainter(
-                ImageRequest.Builder // Placeholder drawable resource
-                // Error drawable resource
-                    (LocalContext.current).data(data = product.image)
-                    .apply(block = fun ImageRequest.Builder.() {
-                        crossfade(true) // Enable crossfade animation between placeholders and loaded images
-                        placeholder(R.drawable.placeholder) // Placeholder drawable resource
-                        error(R.drawable.error) // Error drawable resource
-                    }).build()
-            ),
-            contentDescription = product.title,
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            contentScale = ContentScale.Crop // Adjust content scale type as needed
-        )
+                .padding(16.dp)
+        ) {
+            Text(
+                text = product.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+            Text(
+                text = "Price: $${product.price}",
+                color = Color.Gray,
+                fontSize = 16.sp
+            )
+            Text(
+                text = product.description,
+                fontSize = 14.sp
+            )
+            // Load and display image using Coil
+            Image(
+                painter = rememberAsyncImagePainter(
+                    ImageRequest.Builder(LocalContext.current)
+                        .data(product.image)
+                        .apply(block = {
+                            crossfade(true)
+                            placeholder(R.drawable.placeholder) // Add placeholder image resource here
+                            error(R.drawable.error) // Add error image resource here
+                        }).build()
+                ),
+                contentDescription = product.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .padding(top = 8.dp),
+                contentScale = ContentScale.Crop // Adjust content scale type as needed
+            )
+            Button(
+                onClick = { /* Handle buy button click */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                Text(text = "Buy")
+            }
+        }
     }
 }

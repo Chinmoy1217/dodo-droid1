@@ -74,7 +74,7 @@ dependencies {
     implementation(libs.jetbrains.kotlinx.coroutines.core)
 
     // Lifecycle components
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.runtime.livedata)
 
