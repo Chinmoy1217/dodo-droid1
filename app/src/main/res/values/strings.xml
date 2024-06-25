@@ -7,4 +7,11 @@
     <string name="login">Login</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="dont_have_account_Register">"Don't have an account?Register"</string>
+    <string name="error_generic">An error occurred, please try again.</string>
+    <string name="forgot_password_screen">Forgot Password Screen</string>
+    <string name="register_screen">Register Screen</string>
+    <string name="email">Email</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="email_sent">Password reset email sent.</string>
+    <string name="invalid_email">Invalid email address</string>
 </resources>

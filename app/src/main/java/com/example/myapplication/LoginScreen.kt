@@ -38,24 +38,11 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun ForgotPasswordScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Forgot Password Screen")
-    }
-}
-
-@Composable
-fun RegisterScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Register Screen")
-    }
-}
-
-@Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onForgotPassword: () -> Unit,
-    onRegister: () -> Unit
+    onRegister: () -> Unit,
+    onPhoneSignIn: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -172,6 +159,17 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { onPhoneSignIn() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text("Sign in with Phone Number")
             }
         }
 

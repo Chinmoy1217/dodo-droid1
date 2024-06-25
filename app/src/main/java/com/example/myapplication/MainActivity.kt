@@ -118,11 +118,33 @@ fun MyApp() {
 
     MyApplicationTheme(darkTheme = isDarkMode) {
         if (!isLoggedIn) {
-            LoginScreen(
-                onLoginSuccess = { isLoggedIn = true },
-                onForgotPassword = { navController.navigate("forgotPassword") },
-                onRegister = { navController.navigate("register") }
-            )
+            NavHost(
+                navController = navController,
+                startDestination = "login"
+            ) {
+                composable("login") {
+                    LoginScreen(
+                        onLoginSuccess = { isLoggedIn = true },
+                        onForgotPassword = { navController.navigate("forgotPassword") },
+                        onRegister = { navController.navigate("register") },
+                        onPhoneSignIn = { navController.navigate("phoneSignIn") }  // Corrected the missing comma
+                    )
+                }
+                composable("forgotPassword") {
+                    ForgotPasswordScreen(onBack = { navController.popBackStack() })
+                }
+                composable("register") {
+                    RegisterScreen(
+                        onRegisterSuccess = { navController.navigate("login") },
+                        onBack = { navController.popBackStack() })
+                }
+                composable("phoneSignIn") {  // Added this composable
+                    PhoneSignInScreen(
+                        onPhoneSignInSuccess = { navController.navigate("main") },
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
         } else {
             ModalNavigationDrawer(
                 drawerState = drawerState,
@@ -211,8 +233,6 @@ fun MyApp() {
                                 composable("settings") { SettingsScreen() }
                                 composable("about") { AboutScreen() }
                                 composable("help") { HelpScreen() }
-                                composable("forgotPassword") { ForgotPasswordScreen() }
-                                composable("register") { RegisterScreen() }
                                 composable("products") { ProductListScreen() }
                             }
                         }
@@ -307,7 +327,6 @@ fun DrawerContent(
                     navController.navigate("products")
                 }
             }
-
         )
         Spacer(modifier = Modifier.weight(1f))
         DrawerMenuItem(
@@ -484,6 +503,7 @@ fun HelpScreen() {
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
