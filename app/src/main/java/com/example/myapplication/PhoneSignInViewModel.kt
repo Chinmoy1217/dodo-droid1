@@ -46,7 +46,7 @@ class PhoneSignInViewModel : ViewModel() {
                     token: PhoneAuthProvider.ForceResendingToken
                 ) {
                     this@PhoneSignInViewModel.verificationId = verificationId
-                    isCodeSent = true
+                    isCodeSent = true // Update isCodeSent state
                     isLoading = false
                     Log.d("PhoneAuth", "Code Sent: $verificationId")
                 }

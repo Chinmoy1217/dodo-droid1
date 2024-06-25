@@ -15,17 +15,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.validatePhoneNumber
 
 @Composable
 fun PhoneSignInScreen(
@@ -41,20 +40,6 @@ fun PhoneSignInScreen(
     val errorMessage by remember { mutableStateOf(viewModel.errorMessage) }
     val isCodeSent by remember { mutableStateOf(viewModel.isCodeSent) }
     var isPhoneNumberValid by remember { mutableStateOf(true) }
-
-    LaunchedEffect(viewModel) {
-        snapshotFlow { viewModel.phoneNumber }
-            .collect { phoneNumber = it }
-    }
-
-    LaunchedEffect(viewModel) {
-        snapshotFlow { viewModel.verificationCode }
-            .collect { verificationCode = it }
-    }
-
-    fun validatePhoneNumber(number: String): Boolean {
-        return number.matches(Regex("^(\\+91)?[6-9][0-9]{9}\$"))
-    }
 
     Box(
         modifier = Modifier
@@ -94,6 +79,7 @@ fun PhoneSignInScreen(
                     Text("Send Verification Code")
                 }
             } else {
+                // Show OTP input when isCodeSent is true
                 OutlinedTextField(
                     value = verificationCode,
                     onValueChange = {
