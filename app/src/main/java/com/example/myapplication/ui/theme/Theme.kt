@@ -16,6 +16,7 @@ fun MyApplicationTheme(
 
     MaterialTheme(
         colorScheme = colors,
-        content = content
+        content = content,
+        shapes = Shapes
     )
 }
