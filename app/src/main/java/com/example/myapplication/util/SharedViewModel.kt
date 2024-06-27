@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.myapplication.util
 
 import android.content.Context
@@ -79,4 +81,6 @@ class SharedViewModel : ViewModel() {
             Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
         }
     }
+
 }
+

@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
@@ -27,9 +29,11 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,7 +68,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.nav.NavGraph
+import com.example.myapplication.screen.UploadScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.util.SharedViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -239,6 +245,7 @@ fun MyApp() {
                                 composable("about") { AboutScreen() }
                                 composable("help") { HelpScreen() }
                                 composable("products") { ProductListScreen() }
+                                composable("upload") { UploadScreen { navController.popBackStack() } }
                             }
                         }
                     }
@@ -334,6 +341,17 @@ fun DrawerContent(
                 }
             }
         )
+        DrawerMenuItem(
+            text = "Upload Image",
+            icon = Icons.Default.ThumbUp,
+            onClick = {
+                scope.launch {
+                    drawerState.close()
+                    navController.navigate("upload")
+                }
+            }
+        )
+        Spacer(modifier = Modifier.weight(1f))
         Spacer(modifier = Modifier.weight(1f))
         DrawerMenuItem(
             text = "Back to Main Menu",
@@ -432,6 +450,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun HomeScreen() {
+    val uploadedImages: List<String> by remember { mutableStateOf(listOf<String>()) } // replace with your list of image URLs
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -446,10 +466,34 @@ fun HomeScreen() {
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn {
+                items(uploadedImages) { imageUrl ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Column {
+                            Image(
+                                painter = rememberAsyncImagePainter(model = imageUrl),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                            )
+                            Text(
+                                text = "Uploaded Image",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
-
 @Composable
 fun SettingsScreen() {
     NavGraph(navController = rememberNavController(), sharedViewModel = SharedViewModel())
